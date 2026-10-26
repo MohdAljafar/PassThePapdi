@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TransferStatus {
+  PENDING
+  CLAIMED
+  EXPIRED
+}
+
+enum JourneyEventType {
+  CREATED
+  TRANSFERRED
+}
+
+model User {
+  id             String       @id @default(cuid())
+  googleSub      String       @unique
+  email          String       @unique
+  name           String
+  pictureUrl     String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  ownedBoxes     Box[]        @relation("CurrentOwner")
+  createdBoxes   Box[]        @relation("BoxCreator")
+  sentTransfers  Transfer[]   @relation("TransferSender")
+  receivedTransfers Transfer[] @relation("TransferRecipient")
+  journeyEvents  BoxJourney[] @relation("JourneyActor")
+  journeyFrom    BoxJourney[] @relation("JourneyFromOwner")
+  journeyTo      BoxJourney[] @relation("JourneyToOwner")
+
+  @@index([email])
+}
+
+model Box {
+  id             String       @id @default(cuid())
+  boxCode        String       @unique
+  imageUrl       String
+  note           String?
+  currentOwnerId String
+  creatorId      String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  currentOwner   User         @relation("CurrentOwner", fields: [currentOwnerId], references: [id], onDelete: Restrict)
+  creator        User         @relation("BoxCreator", fields: [creatorId], references: [id], onDelete: Restrict)
+  journeys       BoxJourney[]
+  transfers      Transfer[]
+
+  @@index([currentOwnerId, createdAt])
+}
+
+model Transfer {
+  id              String         @id @default(cuid())
+  boxId           String
+  senderId         String
+  recipientId      String?
+  tokenHash        String         @unique
+  status           TransferStatus @default(PENDING)
+  message          String?
+  createdAt        DateTime       @default(now())
+  expiresAt        DateTime
+  claimedAt        DateTime?
+  box              Box            @relation(fields: [boxId], references: [id], onDelete: Restrict)
+  sender           User           @relation("TransferSender", fields: [senderId], references: [id], onDelete: Restrict)
+  recipient        User?          @relation("TransferRecipient", fields: [recipientId], references: [id], onDelete: Restrict)
+
+  @@index([senderId, createdAt])
+  @@index([recipientId, createdAt])
+  @@index([boxId, status])
+  @@index([expiresAt, status])
+}
+
+model BoxJourney {
+  id             String           @id @default(cuid())
+  boxId          String
+  actorId        String?
+  eventType      JourneyEventType
+  fromOwnerId    String?
+  toOwnerId      String
+  note           String?
+  createdAt      DateTime         @default(now())
+  box            Box              @relation(fields: [boxId], references: [id], onDelete: Restrict)
+  actor          User?            @relation("JourneyActor", fields: [actorId], references: [id], onDelete: SetNull)
+  fromOwner      User?            @relation("JourneyFromOwner", fields: [fromOwnerId], references: [id], onDelete: SetNull)
+  toOwner        User             @relation("JourneyToOwner", fields: [toOwnerId], references: [id], onDelete: Restrict)
+
+  @@index([boxId, createdAt])
+  @@index([toOwnerId, createdAt])
+  @@index([fromOwnerId, createdAt])
+}
