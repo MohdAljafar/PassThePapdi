@@ -15,7 +15,7 @@ const state = {
   claim: null,
   claimLoginRequested: false,
 };
-const DEFAULT_IMAGE = "/soan-papdi.jpg";
+const DEFAULT_IMAGE = new URL("/soanpapdi.jpg", import.meta.url).toString();
 
 function esc(value) {
   return String(value ?? "").replace(
@@ -330,10 +330,11 @@ function buyStart() {
   showModal("buyModal");
 }
 async function confirmBuy() {
-  const imageUrl = $("imageUrl").value.trim();
+  let imageUrl = $("imageUrl").value.trim();
   if (!imageUrl) {
-    toast("Please enter a direct image URL.");
-    return;
+    // toast("Please enter a direct image URL.");
+    imageUrl = DEFAULT_IMAGE;
+    // return;
   }
   try {
     const data = await api("/api/boxes", {

@@ -54,7 +54,7 @@ router.get('/:boxCode/journey', async (req, res, next) => {
       select: {
         id: true, boxCode: true, imageUrl: true, createdAt: true,
         currentOwner: { select: { name: true } },
-        journeys: { orderBy: { createdAt: 'asc' }, include: {
+        journeys: { orderBy: { createdAt: 'desc' }, include: {
           fromOwner: { select: { name: true } }, toOwner: { select: { name: true } },
         } },
       },
