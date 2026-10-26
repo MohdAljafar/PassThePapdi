@@ -418,10 +418,34 @@ async function loadClaimPreview(unauthenticated = false) {
       `/api/transfers/claim/${encodeURIComponent(state.claimToken)}`,
     );
     state.claim = data.claim;
-    $("claimImage").src = data.claim.imageUrl || DEFAULT_IMAGE;
+    const video = $("claimVideo");
+
+    video.src = "/animation.mp4";
+    video.muted = true;
+    video.loop = true;
+    video.controls = false;
+
+    // Start playback when the claim page loads.
+    video.play().catch(() => {
+      // Some browsers may delay autoplay until user interaction.
+    });
+
+    function escapeHtml(str = "") {
+      return String(str).replace(
+        /[&<>"']/g,
+        (char) =>
+          ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+          })[char],
+      );
+    }
     $("claimTitle").textContent = `${data.claim.boxCode} is waiting for you`;
-    $("claimDescription").textContent =
-      `Sent by ${data.claim.senderName}. Sign in and explicitly claim it to make this box yours.`;
+    $("claimDescription").innerHTML =
+      `Sent by <strong>${escapeHtml(data.claim.senderName)}</strong>. Sign in and explicitly claim it to make this box yours.`;
     $("claimMessage").textContent = data.claim.message || "";
     if (state.user) {
       $("claimAction").textContent = "Claim this box";

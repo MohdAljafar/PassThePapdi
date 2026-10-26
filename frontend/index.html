@@ -633,11 +633,17 @@
         padding: 24px;
         box-shadow: var(--shadow);
       }
-      .claim-card img {
+      .claim-card .claim-video {
+        display: block;
         width: 100%;
-        height: 240px;
+        height: 280px;
         object-fit: cover;
         border-radius: 14px;
+        background: #102c24;
+        pointer-events: none;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
       }
       .claim-card h1 {
         font:
@@ -816,7 +822,11 @@
         <div class="login-card">
           <div class="brand" style="padding: 0 0 25px">
             <div class="brandmark">🪔</div>
-            <div><a href="/" style="text-decoration: none; color: black">Pass The Papdi</a><small>PASS THE SWEETNESS</small></div>
+            <div>
+              <a href="/" style="text-decoration: none; color: black"
+                >Pass The Papdi</a
+              ><small>PASS THE SWEETNESS</small>
+            </div>
           </div>
           <h2>Welcome to the club.</h2>
           <p>
@@ -836,13 +846,29 @@
       <div class="claim-card">
         <div class="brand" style="padding: 0 0 18px">
           <div class="brandmark">🪔</div>
-          <div><a href="/" style="text-decoration: none; color: black">Pass The Papdi</a><small>PASS THE SWEETNESS</small></div>
+          <div>
+            <a href="/" style="text-decoration: none; color: black"
+              >Pass The Papdi</a
+            ><small>PASS THE SWEETNESS</small>
+          </div>
         </div>
-        <img
-          id="claimImage"
-          src="/soan-papdi.jpg"
-          alt="Soan Papdi gift box"
-        /><span class="status gold" style="margin-top: 16px"
+        <video
+          id="claimVideo"
+          class="claim-video"
+          src="/animation.mp4"
+          autoplay
+          muted
+          loop
+          playsinline
+          disablepictureinpicture
+          disableremoteplayback
+          controlslist="nodownload noplaybackrate noremoteplayback"
+          preload="auto"
+          draggable="false"
+          aria-label="Your surprise gift animation"
+          oncontextmenu="return false;"
+        ></video
+        ><span class="status gold" style="margin-top: 16px"
           >A SWEET SURPRISE</span
         >
         <h1 id="claimTitle">A box is on its way to you</h1>
@@ -866,7 +892,11 @@
       <aside class="sidebar">
         <div class="brand">
           <div class="brandmark">🪔</div>
-          <div><a href="/" style="text-decoration: none; color: black">Pass The Papdi</a><small>PASS THE SWEETNESS</small></div>
+          <div>
+            <a href="/" style="text-decoration: none; color: black"
+              >Pass The Papdi</a
+            ><small>PASS THE SWEETNESS</small>
+          </div>
         </div>
         <nav class="nav">
           <button class="active" data-view="dashboard">
