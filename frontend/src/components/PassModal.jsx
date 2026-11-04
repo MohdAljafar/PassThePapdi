@@ -8,6 +8,8 @@ export default function PassModal({ boxes, initialBox, onClose, onCreated }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -27,9 +29,16 @@ export default function PassModal({ boxes, initialBox, onClose, onCreated }) {
     } catch (err) { setError(err.message); }
     finally { setLoading(false); }
   }
+
   async function copyLink() {
-    try { await navigator.clipboard.writeText(result.claimUrl); setError("Link copied! Share it with your friend."); }
-    catch { setError(result.claimUrl); }
+    try {
+      await navigator.clipboard.writeText(result.claimUrl);
+      setNotice("Claim link copied. Send it to the person you're thinking of!");
+    } catch {
+      const input = document.getElementById("claim-link-output");
+      input?.select();
+      setNotice("Select the link above and copy it to share.");
+    }
   }
 
   return (
@@ -46,10 +55,14 @@ export default function PassModal({ boxes, initialBox, onClose, onCreated }) {
           <button disabled={loading || !boxCode} className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3.5 font-bold text-white shadow-lg shadow-forest/15 transition hover:bg-forest-dark disabled:opacity-60">{loading ? <LoaderCircle className="animate-spin"/> : <Gift size={19}/>} Create claim link</button>
           <p className="text-center text-xs leading-relaxed text-muted">The box stays with you until someone eligible claims it.</p>
         </form> : <div className="space-y-4">
-          <div className="rounded-2xl border border-line bg-white p-4"><div className="mb-2 flex items-center gap-2 text-sm font-bold text-forest"><Check size={17}/> {result.transfer?.box?.boxCode || boxCode}</div><p className="break-all text-sm text-muted">{result.claimUrl}</p></div>
+          <div className="rounded-2xl border border-line bg-white p-4">
+            <div className="mb-2 flex items-center gap-2 text-sm font-bold text-forest"><Check size={17}/> {result.transfer?.box?.boxCode || boxCode} · Ready to share</div>
+            <input id="claim-link-output" readOnly value={result.claimUrl} onFocus={(e)=>e.currentTarget.select()} className="w-full rounded-lg border border-line bg-cream px-3 py-2 text-sm text-muted"/>
+            <p className="mt-2 text-xs leading-relaxed text-muted">The box remains yours until the recipient explicitly claims it.</p>
+          </div>
           <button onClick={copyLink} className="flex w-full items-center justify-center gap-2 rounded-xl border border-line bg-white px-5 py-3 font-bold text-forest hover:bg-cream"><Copy size={18}/> Copy claim link</button>
           <a href={result.whatsappUrl} target="_blank" rel="noreferrer" className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1fa855] px-5 py-3.5 font-bold text-white hover:bg-[#188c46]"><MessageCircle size={18}/> Share on WhatsApp</a>
-          {error && <p className="text-center text-sm text-forest">{error}</p>}
+          {notice && <p className="rounded-xl bg-softgreen p-3 text-center text-sm font-semibold text-forest">{notice}</p>}
           <button onClick={onClose} className="w-full py-2 text-sm font-semibold text-muted hover:text-forest">Done</button>
         </div>}
       </section>
