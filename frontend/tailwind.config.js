@@ -12,6 +12,8 @@ export default {
         ink: "#302219",
         muted: "#87766a",
         line: "#ecdfcd",
+        softgreen: "#e5f0e8",
+        softgold: "#f9efd9",
       },
       fontFamily: {
         sans: ["DM Sans", "ui-sans-serif", "system-ui"],
