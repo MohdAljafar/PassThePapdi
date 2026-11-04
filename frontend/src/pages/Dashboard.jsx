@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowRight, Gift, MapPin, RefreshCw, Sparkles, Users, Route, ChevronRight, LoaderCircle } from "lucide-react";
+import { ArrowRight, Gift, MapPin, RefreshCw, Sparkles, Users, Route, ChevronRight, LoaderCircle, Plus } from "lucide-react";
 import { api } from "../lib/api";
 import GiftMap from "../components/GiftMap";
 import PassModal from "../components/PassModal";
 import Topbar from "../components/Topbar";
+import ExploreDrawer from "../components/ExploreDrawer";
 
 export default function Dashboard({ user, onLogout }) {
   const [dashboard, setDashboard] = useState(null);
@@ -59,7 +60,7 @@ export default function Dashboard({ user, onLogout }) {
           <button onClick={load} disabled={loading} className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2.5 text-sm font-bold text-forest hover:border-gold/50 disabled:opacity-60"><RefreshCw size={15} className={loading?"animate-spin":""}/> Refresh</button>
         </div>
 
-        {toast && <div className="mb-5 flex items-center justify-between rounded-2xl border border-forest/15 bg-softgreen px-4 py-3 text-sm font-semibold text-forest"><span>{toast}</span><button onClick={()=>setToast("")}>×</button></div>}
+        {toast && <div className="mb-5 flex items-center justify-between rounded-2xl border border-forest/15 bg-softgreen px-4 py-3 text-sm font-semibold text-forest"><span>{toast}</span><button onClick={()=>setToast("")} aria-label="Dismiss">×</button></div>}
 
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(300px,.75fr)]">
           <div className="overflow-hidden rounded-[1.75rem] border border-line bg-paper shadow-soft">
@@ -79,7 +80,7 @@ export default function Dashboard({ user, onLogout }) {
               <h2 className="mt-5 font-display text-3xl font-bold leading-tight">Make someone<br/>else smile today.</h2>
               <p className="mt-3 text-sm leading-relaxed text-white/70">Choose a box you own, add a note, and send a claim link. The gift stays yours until someone claims it.</p>
               <button onClick={()=>setPassOpen(true)} disabled={!boxes.length} className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-[#e8c98c] px-4 py-4 font-extrabold text-forest transition hover:bg-[#f1d9a8] disabled:cursor-not-allowed disabled:opacity-50"><Gift size={19}/> Pass the gift on <ArrowRight size={18}/></button>
-              {!boxes.length && <p className="mt-3 text-center text-xs text-white/65">You don't have a box to pass on yet.</p>}
+              {!boxes.length && <div className="mt-3 text-center"><p className="text-xs text-white/70">You don't have a box to pass on yet.</p><Link to="/explore?tab=add" className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-[#f1d9a8] underline underline-offset-4"><Plus size={13}/> Add a box to your collection</Link></div>}
             </div>
 
             <div className="grid grid-cols-3 gap-2">
@@ -100,16 +101,11 @@ export default function Dashboard({ user, onLogout }) {
             </div>
           </div>
         </section>
-
-        <section className="mt-7 rounded-3xl border border-line bg-paper p-5 sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[.18em] text-gold">Keep the chain going</p><h2 className="mt-1 font-display text-2xl font-bold text-forest">The next chapter starts with you.</h2></div><button onClick={()=>setPassOpen(true)} disabled={!boxes.length} className="inline-flex items-center gap-2 rounded-full bg-forest px-5 py-3 text-sm font-bold text-white hover:bg-forest-dark disabled:opacity-50">Pass a gift <ArrowRight size={16}/></button></div>
-        </section>
       </main>
-      {passOpen && <PassModal boxes={boxes} onClose={()=>setPassOpen(false)} onCreated={()=>{}}/>}
-      {menuOpen && <ExploreQuickMenu onClose={()=>setMenuOpen(false)}/>}
+      {passOpen && <PassModal boxes={boxes} onClose={()=>setPassOpen(false)} onCreated={()=>load()}/>}
+      <ExploreDrawer open={menuOpen} onClose={()=>setMenuOpen(false)}/>
     </div>
   );
 }
 function Stat({icon:Icon,label,value}){return <div className="rounded-2xl border border-line bg-white p-3 text-center"><Icon size={17} className="mx-auto text-gold"/><p className="mt-1 font-display text-2xl font-bold text-forest">{value}</p><p className="text-[10px] font-semibold text-muted">{label}</p></div>}
 function Metric({label,value}){return <div className="flex items-center justify-between"><span className="text-muted">{label}</span><strong className="text-forest">{value}</strong></div>}
-function ExploreQuickMenu({onClose}){return <div className="fixed inset-0 z-40 bg-ink/35 p-4" onMouseDown={onClose}><div className="ml-auto mt-16 max-w-xs rounded-2xl bg-paper p-5 shadow-2xl" onMouseDown={e=>e.stopPropagation()}><div className="flex justify-between"><h3 className="font-display text-xl text-forest">Explore</h3><button onClick={onClose}>×</button></div><Link onClick={onClose} to="/explore" className="mt-4 block rounded-xl bg-cream p-3 text-sm font-bold text-forest">My gifts and journey history →</Link></div></div>}
