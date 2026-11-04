@@ -43,6 +43,9 @@ export default function Dashboard({ user, onLogout }) {
     if (location.state?.justClaimed) {
       setToast("Your gift is now yours. Welcome to the journey! 🎉");
       navigate("/", { replace: true, state: {} });
+    } else if (location.state?.addedBox) {
+      setToast("Your new box is in your collection. Its journey starts now! 🎁");
+      navigate("/", { replace: true, state: {} });
     }
   }, [location.state, navigate]);
 
