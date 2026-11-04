@@ -1,64 +1,70 @@
-# Soan Papdi Club — Frontend
+# Soan Papdi Club — React Frontend
 
-A lightweight Vite + vanilla JavaScript frontend connected to the Soan Papdi Club Express API. No React required.
+A mobile-first React + Vite frontend styled with Tailwind CSS. It connects to the existing Soan Papdi Club Express API; no backend rewrite is required.
 
-## Features
+## Main experience
 
-- Google sign-in using Google Identity Services and the backend `POST /api/auth/google` route.
-- Session-cookie authentication (`credentials: include`).
-- Live dashboard statistics, current inventory, received history, sent transfers, and recent journey events.
-- Add a box using a direct image URL (`POST /api/boxes`). The server assigns the unique box ID.
-- Create a secure pass-on link and open the WhatsApp share URL (`POST /api/transfers`). Ownership does not change until a recipient claims the link.
-- Claim page at `/claim/:token`: preview is read-only; transfer only happens after an explicit Claim button (`POST /api/transfers/claim`).
-- Public journey tracking by box code.
+- Claim links open a friendly gift preview at `/claim/:token`. Previewing the link is read-only.
+- Recipients sign in with Google, then explicitly choose whether to share their location before claiming.
+- Location permission is optional. Denying permission or choosing “Skip location” still allows the claim.
+- After a successful claim, the recipient lands on the journey-first dashboard.
+- The dashboard leads with the live shared-location map and a prominent “Pass the gift on” action.
+- The Explore drawer contains collection, received gifts, sent gifts, box tracking, and add-box tools.
 
-## Requirements
+## Stack
 
-- Node.js 20+
-- The Soan Papdi Club backend running and connected to Neon/PostgreSQL
-- Google OAuth Web Client ID matching the backend's `GOOGLE_CLIENT_ID`
+- React 18, React Router, Vite
+- Tailwind CSS
+- React Leaflet + Leaflet
+- Lucide React icons
+- Existing Node.js / Express / Prisma / Neon backend
 
-## Setup
+## Local setup
 
-1. Extract this folder alongside the backend project (or wherever you prefer).
-2. In this folder, create `.env` from `.env.example`.
-3. Set the same Google OAuth Web Client ID used by the backend:
+Requirements: Node.js 20+ and the existing backend running on port 4000.
+
+1. Open a terminal in `frontend`.
+2. Create `.env` from `.env.example` and set:
 
    ```env
    VITE_API_BASE_URL=http://localhost:4000
-   VITE_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+   VITE_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
    ```
 
-4. In the backend `.env`, confirm:
+3. Ensure `backend/.env` contains:
 
    ```env
    FRONTEND_URL=http://localhost:5173
    ```
 
-5. In Google Cloud Console → OAuth client → Authorized JavaScript origins, add:
-
-   ```text
-   http://localhost:5173
-   ```
-
-   Keep the backend callback configuration as required by your backend. This frontend uses Google Identity Services ID-token flow, which posts the credential to `/api/auth/google`; it does not use a redirect callback URI for this frontend flow.
-
-6. Start the backend in its own terminal:
+4. In Google Cloud Console, add `http://localhost:5173` under the OAuth client's **Authorized JavaScript origins**.
+5. Start the backend in its own terminal:
 
    ```bash
+   cd backend
    npm run dev
    ```
 
-7. In this frontend folder, run:
+6. In another terminal, install and start the frontend:
 
    ```bash
+   cd frontend
    npm install
    npm run dev
    ```
 
-8. Open the Vite URL, normally `http://localhost:5173`.
+7. Open `http://localhost:5173`.
 
-## API routes used
+The first `npm install` refreshes `package-lock.json` to match the new React dependencies.
+
+## Build
+
+```bash
+npm run build
+npm run preview
+```
+
+## Existing API routes used
 
 - `GET /api/auth/me`
 - `POST /api/auth/google`
@@ -72,10 +78,16 @@ A lightweight Vite + vanilla JavaScript frontend connected to the Soan Papdi Clu
 - `GET /api/transfers/received`
 - `GET /api/transfers/claim/:token`
 - `POST /api/transfers/claim`
+- `GET /api/map/locations`
 
-## Notes
+## Map and location privacy
 
-- Payments are not integrated. “Add a box” currently creates a box record for testing; it is not a real purchase.
-- The image URL must be a direct HTTP(S) URL. The default image is bundled locally for the UI, but the API currently requires an image URL when creating a box.
-- For deployment, set `VITE_API_BASE_URL` to your deployed backend URL and update backend `FRONTEND_URL` and CORS to the deployed frontend origin. Use HTTPS in production and configure secure cookies appropriately.
-- Do not commit `.env` or share database passwords, OAuth secrets, or session cookies.
+The map endpoint requires an authenticated session. It returns approximate coordinates (rounded by the backend) for people who voluntarily shared location when claiming. Each location is shown as an approximate 5 km circle. Exact coordinates are not displayed by the map UI. The frontend does not request location when a claim link is opened; it requests it only after the recipient explicitly chooses “Share location & claim”.
+
+## Add-box note
+
+The existing `POST /api/boxes` endpoint creates a box record and assigns its unique code. This is a collection/testing action, not a payment or purchase flow. The image URL must be a direct HTTP(S) URL; the UI uses the bundled `/soanpapdi.jpg` asset by default.
+
+## Deployment
+
+For production, set `VITE_API_BASE_URL` to the deployed backend URL and update backend `FRONTEND_URL` and CORS to the deployed frontend origin. Use HTTPS and configure secure cookies appropriately. Keep `.env`, database passwords, OAuth secrets, and session cookies out of Git.
