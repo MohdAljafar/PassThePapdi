@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { Circle, CircleMarker, MapContainer, Popup, TileLayer, useMap } from "react-leaflet";
 import { formatDate } from "../lib/api";
 import L from "leaflet";
@@ -29,7 +29,7 @@ export default function GiftMap({ locations = [], className = "h-[430px]" }) {
           const lng = Number(item.longitude);
           if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
           return (
-            <span key={item.id}>
+            <Fragment key={item.id}>
               <Circle
                 center={[lat, lng]}
                 radius={Number(item.radiusMeters) || 5000}
@@ -48,7 +48,7 @@ export default function GiftMap({ locations = [], className = "h-[430px]" }) {
                   </div>
                 </Popup>
               </CircleMarker>
-            </span>
+            </Fragment>
           );
         })}
         <FitLocations locations={locations} />
