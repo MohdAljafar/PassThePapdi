@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; font-synthesis: none; text-rendering: optimizeLegibility; }
+* { box-sizing: border-box; }
+html { background: #fff9f0; }
+body { margin: 0; min-width: 320px; background: #fff9f0; color: #302219; font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; }
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+::selection { background: #ead2a5; color: #103b2d; }
+.leaflet-container { z-index: 0; font-family: "DM Sans", sans-serif; }
+.leaflet-popup-content-wrapper { border-radius: 12px; }
+.leaflet-popup-content { margin: 12px 14px; }
+.gift-pin { background: #174c3b; border: 3px solid #fffdf9; border-radius: 999px; box-shadow: 0 2px 12px #173c2d55; width: 14px; height: 14px; }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.animate-rise { animation: rise .45s ease both; }
+@keyframes soft-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(189,135,54,.25); } 50% { box-shadow: 0 0 0 12px rgba(189,135,54,0); } }
+.soft-pulse { animation: soft-pulse 2.4s infinite; }
