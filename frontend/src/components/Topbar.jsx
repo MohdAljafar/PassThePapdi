@@ -8,8 +8,8 @@ export default function Topbar({ user, onLogout, onMenu }) {
         <Link to="/" className="flex items-center gap-2.5">
           <span className="grid h-10 w-10 place-items-center rounded-2xl bg-forest text-xl text-white">🪔</span>
           <span>
-            <span className="block font-display text-lg font-bold leading-tight text-forest">Soan Papdi Club</span>
-            <span className="block text-[10px] font-bold uppercase tracking-[.2em] text-muted">Every box has a story</span>
+            <span className="block font-display text-lg font-bold leading-tight text-forest">Pass The Papdi</span>
+            <span className="block text-[10px] font-bold uppercase tracking-[.2em] text-muted">& brighten India again</span>
           </span>
         </Link>
         <div className="flex items-center gap-2">
