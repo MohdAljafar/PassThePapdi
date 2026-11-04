@@ -20,7 +20,13 @@ if (process.env.JWT_SECRET.length < 32) {
 const app = express();
 app.disable('x-powered-by');
 app.set('trust proxy', process.env.NODE_ENV === 'production' ? 1 : false);
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginOpenerPolicy: {
+      policy: 'same-origin-allow-popups',
+    },
+  })
+);
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true,
@@ -37,13 +43,33 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/boxes', require('./routes/boxes'));
 app.use('/api/transfers', require('./routes/transfers'));
+app.use('/api/map', require('./routes/map'));
 
 app.use((_req, res) => res.status(404).json({ error: 'Route not found.' }));
 app.use((err, _req, res, _next) => {
-  console.error(err);
-  if (err.code === 'P2002') return res.status(409).json({ error: 'A record with this unique value already exists.' });
-  if (err.code === 'P2025') return res.status(404).json({ error: 'Record not found.' });
-  res.status(500).json({ error: 'Unexpected server error.' });
+  console.error('SERVER ERROR:', err);
+
+  if (err.code === 'P2002') {
+    return res.status(409).json({
+      error: 'A record with this unique value already exists.'
+    });
+  }
+
+  if (err.code === 'P2025') {
+    return res.status(404).json({
+      error: 'Record not found.'
+    });
+  }
+
+  if (err.code === 'P1001') {
+    return res.status(503).json({
+      error: 'Database server is unreachable.'
+    });
+  }
+
+  res.status(500).json({
+    error: 'Unexpected server error.'
+  });
 });
 
 const port = Number(process.env.PORT || 4000);

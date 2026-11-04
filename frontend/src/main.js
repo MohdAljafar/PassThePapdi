@@ -1,3 +1,5 @@
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 const API = (
   import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"
 ).replace(/\/$/, "");
@@ -14,6 +16,8 @@ const state = {
   claimToken: null,
   claim: null,
   claimLoginRequested: false,
+  giftMap: null,
+giftLayer: null,
 };
 const DEFAULT_IMAGE = new URL("/soanpapdi.jpg", import.meta.url).toString();
 
@@ -285,7 +289,7 @@ function navigate(view) {
   document
     .querySelectorAll(".nav button")
     .forEach((b) => b.classList.toggle("active", b.dataset.view === view));
-  ["dashboard", "inventory", "received", "sent", "journey"].forEach((v) =>
+  ["dashboard", "inventory", "received", "sent", "journey", "map"].forEach((v) =>
     $(`${v}View`).classList.toggle("hidden", v !== view),
   );
   $("crumbCurrent").textContent =
@@ -295,9 +299,141 @@ function navigate(view) {
       received: "Received by Me",
       sent: "Sent by Me",
       journey: "Track a Box",
+      map: "Gift Map",
     }[view] || "Dashboard";
   window.scrollTo({ top: 0, behavior: "smooth" });
+  if (view === "map") {
+  loadGiftMap();
 }
+}
+
+
+async function loadGiftMap() {
+  const mapElement = $("giftMap");
+
+  if (!mapElement) return;
+
+  // Create the Leaflet map only once.
+  if (!state.giftMap) {
+    state.giftMap = L.map("giftMap").setView([20.5937, 78.9629], 5);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19,
+    }).addTo(state.giftMap);
+
+    state.giftLayer = L.featureGroup().addTo(state.giftMap);
+  }
+
+  // The map may have been hidden before this page was opened.
+  setTimeout(() => state.giftMap.invalidateSize(), 100);
+
+  $("giftMapStatus").textContent = "Loading accepted gifts...";
+
+  try {
+    const data = await api("/api/map/locations");
+    const locations = data.locations || [];
+
+    state.giftLayer.clearLayers();
+
+    if (!locations.length) {
+      $("giftMapStatus").textContent =
+        "No gifts have shared their location yet. Be the first to pass the sweetness!";
+      state.giftMap.setView([20.5937, 78.9629], 5);
+      return;
+    }
+
+    locations.forEach((location) => {
+      const lat = Number(location.latitude);
+      const lng = Number(location.longitude);
+      const radius = Number(location.radiusMeters) || 5000;
+
+      if (
+        !Number.isFinite(lat) ||
+        !Number.isFinite(lng) ||
+        lat < -90 ||
+        lat > 90 ||
+        lng < -180 ||
+        lng > 180
+      ) {
+        return;
+      }
+
+      const recipient = escapeMapText(
+        location.recipientName || "A club member"
+      );
+
+      const boxCode = escapeMapText(
+        location.box?.boxCode || "Soan Papdi Box"
+      );
+
+      // The 5 km recipient area.
+      L.circle([lat, lng], {
+        radius,
+        color: "#174c3b",
+        weight: 2,
+        opacity: 0.8,
+        fillColor: "#bd8736",
+        fillOpacity: 0.16,
+      })
+        .bindPopup(`
+          <div style="min-width:150px">
+            <strong>${recipient}</strong>
+            <br>
+            <span>${boxCode}</span>
+            <br>
+            <small>5 km gift circle</small>
+          </div>
+        `)
+        .addTo(state.giftLayer);
+
+      // Small marker at the approximate location.
+      L.circleMarker([lat, lng], {
+        radius: 6,
+        color: "#fff",
+        weight: 2,
+        fillColor: "#174c3b",
+        fillOpacity: 1,
+      })
+        .bindPopup(`
+          <strong>${recipient}</strong><br>
+          ${boxCode}
+        `)
+        .addTo(state.giftLayer);
+    });
+
+    const bounds = state.giftLayer.getBounds();
+
+    if (bounds.isValid()) {
+      state.giftMap.fitBounds(bounds, {
+        padding: [35, 35],
+        maxZoom: 12,
+      });
+    }
+
+    $("giftMapStatus").textContent =
+      `${locations.length} accepted gift location(s) across the map.`;
+
+    setTimeout(() => state.giftMap.invalidateSize(), 100);
+
+  } catch (error) {
+    $("giftMapStatus").textContent =
+      error.status === 401
+        ? "Please sign in to view the gift map."
+        : `Could not load gift locations: ${error.message}`;
+  }
+}
+
+function escapeMapText(value) {
+  return String(value).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  })[char]);
+}
+
 async function trackBox(code) {
   navigate("journey");
   $("trackCode").value = code;
@@ -469,36 +605,86 @@ async function loadClaimPreview(unauthenticated = false) {
       "The link may have expired, already been claimed, or the box may have moved.";
   }
 }
+
+async function getUserLocation() {
+  // GPS is optional. Failure or denial must not prevent claiming.
+  if (!("geolocation" in navigator)) {
+    return null;
+  }
+
+  return new Promise((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      },
+      (error) => {
+        console.warn("Location unavailable:", error.message);
+        resolve(null);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      },
+    );
+  });
+}
+
 async function claimBox() {
   if (!state.user) {
     showOnly("loginScreen");
     initGoogleButton();
     return;
   }
+
   $("claimAction").disabled = true;
-  $("claimError").textContent = "Claiming box…";
+  $("claimError").textContent = "Requesting location permission…";
+
   try {
+    // This is the first point at which GPS permission is requested.
+    const location = await getUserLocation();
+
+    $("claimError").textContent = "Claiming your gift…";
+
+    const payload = {
+      token: state.claimToken,
+      ...(location ? { location } : {}),
+    };
+
     const data = await api("/api/transfers/claim", {
       method: "POST",
-      body: JSON.stringify({ token: state.claimToken }),
+      body: JSON.stringify(payload),
     });
+
     $("claimTitle").textContent = `${data.box.boxCode} is now yours!`;
+
     $("claimDescription").textContent =
-      "The ownership change has been recorded in the permanent journey.";
+      location
+        ? "Your gift has been claimed and its location has been added to the club map."
+        : "Your gift has been claimed successfully. Location was not shared.";
+
     $("claimError").textContent = "";
+
     $("claimAction").textContent = "Open my collection";
     $("claimAction").disabled = false;
+
     $("claimAction").onclick = () => {
       history.replaceState({}, "", "/");
       state.claimToken = null;
       loadApp().then(() => navigate("inventory"));
     };
+
     toast(data.message || "Box claimed successfully!");
+
   } catch (e) {
     $("claimError").textContent = e.message;
     $("claimAction").disabled = false;
   }
 }
+
 async function logout() {
   try {
     await api("/api/auth/logout", { method: "POST" });
@@ -543,6 +729,7 @@ document.querySelectorAll("[data-sent-filter]").forEach(
       renderSent();
     }),
 );
+$("refreshGiftMap").onclick = loadGiftMap;
 $("heroBuy").onclick = buyStart;
 $("invBuy").onclick = buyStart;
 $("confirmBuy").onclick = confirmBuy;

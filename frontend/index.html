@@ -645,7 +645,9 @@
         -webkit-user-select: none;
         -webkit-touch-callout: none;
       }
-      .claim-card #claimImage { display: none; }
+      .claim-card #claimImage {
+        display: none;
+      }
       .claim-card h1 {
         font:
           30px Georgia,
@@ -823,7 +825,11 @@
         <div class="login-card">
           <div class="brand" style="padding: 0 0 25px">
             <div class="brandmark">🪔</div>
-            <div><a href="/" style="text-decoration: none; color: black">Pass The Papdi</a><small>PASS THE SWEETNESS</small></div>
+            <div>
+              <a href="/" style="text-decoration: none; color: black"
+                >Pass The Papdi</a
+              ><small>PASS THE SWEETNESS</small>
+            </div>
           </div>
           <h2>Welcome to the club.</h2>
           <p>
@@ -843,7 +849,11 @@
       <div class="claim-card">
         <div class="brand" style="padding: 0 0 18px">
           <div class="brandmark">🪔</div>
-          <div><a href="/" style="text-decoration: none; color: black">Pass The Papdi</a><small>PASS THE SWEETNESS</small></div>
+          <div>
+            <a href="/" style="text-decoration: none; color: black"
+              >Pass The Papdi</a
+            ><small>PASS THE SWEETNESS</small>
+          </div>
         </div>
         <video
           id="claimVideo"
@@ -860,7 +870,7 @@
           tabindex="-1"
           draggable="false"
           aria-label="Your surprise gift animation"
-          oncontextmenu="return false"
+          oncontextmenu="return false;"
         ></video>
         <img id="claimImage" src="/soan-papdi.jpg" alt="Soan Papdi gift box" />
         <span class="status gold" style="margin-top: 16px"
@@ -887,7 +897,11 @@
       <aside class="sidebar">
         <div class="brand">
           <div class="brandmark">🪔</div>
-          <div><a href="/" style="text-decoration: none; color: black">Pass The Papdi</a><small>PASS THE SWEETNESS</small></div>
+          <div>
+            <a href="/" style="text-decoration: none; color: black"
+              >Pass The Papdi</a
+            ><small>PASS THE SWEETNESS</small>
+          </div>
         </div>
         <nav class="nav">
           <button class="active" data-view="dashboard">
@@ -896,6 +910,7 @@
           ><button data-view="received">↙ &nbsp; Received by Me</button
           ><button data-view="sent">↗ &nbsp; Sent by Me</button
           ><button data-view="journey">◎ &nbsp; Track a Box</button>
+          <button data-view="map">🌍 &nbsp; Gift Map</button>
         </nav>
         <div class="sidebar-bottom">
           Every box has a story.<br />Keep the sweetness moving. ✨<br /><button
@@ -930,72 +945,240 @@
         </div>
         <section class="section papdi-dashboard" id="dashboardView">
           <style>
-            .papdi-dashboard { max-width: 1100px; margin-inline: auto; color: #19372c; }
+            .papdi-dashboard {
+              max-width: 1100px;
+              margin-inline: auto;
+              color: #19372c;
+            }
             .papdi-dashboard .papdi-hero {
-              position: relative; overflow: hidden; padding: clamp(28px, 5vw, 56px);
+              position: relative;
+              overflow: hidden;
+              padding: clamp(28px, 5vw, 56px);
               border-radius: 28px;
-              background: radial-gradient(ellipse at 90% 10%, #456c4b 0%, transparent 42%), linear-gradient(130deg, #123d2d, #20543b 65%, #2e6548);
-              color: #fff9e9; box-shadow: 0 18px 50px rgba(24, 59, 43, .14);
+              background:
+                radial-gradient(
+                  ellipse at 90% 10%,
+                  #456c4b 0%,
+                  transparent 42%
+                ),
+                linear-gradient(130deg, #123d2d, #20543b 65%, #2e6548);
+              color: #fff9e9;
+              box-shadow: 0 18px 50px rgba(24, 59, 43, 0.14);
             }
             .papdi-dashboard .papdi-hero::after {
-              content: "✦"; position: absolute; right: 7%; top: 12%; color: rgba(255, 226, 158, .2);
-              font-size: clamp(100px, 18vw, 210px); line-height: 1; pointer-events: none;
+              content: "✦";
+              position: absolute;
+              right: 7%;
+              top: 12%;
+              color: rgba(255, 226, 158, 0.2);
+              font-size: clamp(100px, 18vw, 210px);
+              line-height: 1;
+              pointer-events: none;
             }
             .papdi-dashboard .papdi-eyebrow {
-              display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px;
-              color: #f4d99a; font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+              display: inline-flex;
+              align-items: center;
+              gap: 8px;
+              margin-bottom: 20px;
+              color: #f4d99a;
+              font-size: 11px;
+              font-weight: 800;
+              letter-spacing: 2px;
+              text-transform: uppercase;
             }
-            .papdi-dashboard .papdi-eyebrow::before { content: ""; width: 22px; height: 1px; background: currentColor; }
+            .papdi-dashboard .papdi-eyebrow::before {
+              content: "";
+              width: 22px;
+              height: 1px;
+              background: currentColor;
+            }
             .papdi-dashboard .papdi-hero h1 {
-              position: relative; z-index: 1; max-width: 600px; margin: 0;
-              font-family: Georgia, "Times New Roman", serif; font-size: clamp(38px, 6vw, 66px);
-              font-weight: 500; letter-spacing: -1.8px; line-height: 1.04;
+              position: relative;
+              z-index: 1;
+              max-width: 600px;
+              margin: 0;
+              font-family: Georgia, "Times New Roman", serif;
+              font-size: clamp(38px, 6vw, 66px);
+              font-weight: 500;
+              letter-spacing: -1.8px;
+              line-height: 1.04;
             }
             .papdi-dashboard .papdi-hero p {
-              position: relative; z-index: 1; max-width: 440px; margin: 20px 0 28px;
-              color: rgba(255, 249, 233, .78); font-size: 15px; line-height: 1.8;
+              position: relative;
+              z-index: 1;
+              max-width: 440px;
+              margin: 20px 0 28px;
+              color: rgba(255, 249, 233, 0.78);
+              font-size: 15px;
+              line-height: 1.8;
             }
             .papdi-dashboard .papdi-pass-btn {
-              position: relative; z-index: 2; display: inline-flex; align-items: center; justify-content: center; gap: 12px;
-              min-height: 54px; padding: 0 24px; border: 0; border-radius: 999px; background: #f5d89a; color: #19372c;
-              font-size: 14px; font-weight: 800; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease;
-              box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+              position: relative;
+              z-index: 2;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              gap: 12px;
+              min-height: 54px;
+              padding: 0 24px;
+              border: 0;
+              border-radius: 999px;
+              background: #f5d89a;
+              color: #19372c;
+              font-size: 14px;
+              font-weight: 800;
+              cursor: pointer;
+              transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+              box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
             }
-            .papdi-dashboard .papdi-pass-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0, 0, 0, .18); }
-            .papdi-dashboard .papdi-pass-btn span { font-size: 19px; }
-            .papdi-dashboard .papdi-feed { margin-top: 34px; overflow: hidden; border: 1px solid #e8e8df; border-radius: 22px; background: #fffefa; }
+            .papdi-dashboard .papdi-pass-btn:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+            }
+            .papdi-dashboard .papdi-pass-btn span {
+              font-size: 19px;
+            }
+            .papdi-dashboard .papdi-feed {
+              margin-top: 34px;
+              overflow: hidden;
+              border: 1px solid #e8e8df;
+              border-radius: 22px;
+              background: #fffefa;
+            }
             .papdi-dashboard .papdi-feed-head {
-              display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 25px 26px 20px; border-bottom: 1px solid #eeeee6;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 16px;
+              padding: 25px 26px 20px;
+              border-bottom: 1px solid #eeeee6;
             }
-            .papdi-dashboard .papdi-feed-head h2 { margin: 0; color: #19372c; font-family: Georgia, "Times New Roman", serif; font-size: clamp(22px, 3vw, 28px); font-weight: 500; }
-            .papdi-dashboard .papdi-feed-head p { margin: 7px 0 0; color: #81877d; font-size: 13px; }
-            .papdi-dashboard .papdi-live { flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border-radius: 999px; background: #eef5ec; color: #356448; font-size: 10px; font-weight: 800; letter-spacing: .8px; }
-            .papdi-dashboard .papdi-live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #5a9a63; }
-            .papdi-dashboard #recentList { display: flex; flex-direction: column; padding: 4px 24px; }
-            .papdi-dashboard #recentList .list-row { display: flex; align-items: center; gap: 13px; padding: 17px 0; border-bottom: 1px solid #f0f0e9; }
-            .papdi-dashboard #recentList .list-row:last-child { border-bottom: 0; }
-            .papdi-dashboard #recentList .mini-photo { flex: 0 0 44px; width: 44px; height: 44px; border-radius: 13px; background-color: #f5ead3; background-size: cover; background-position: center; }
-            .papdi-dashboard #recentList .list-info { flex: 1; min-width: 0; }
-            .papdi-dashboard #recentList .list-info b { display: block; color: #263e31; font-size: 13px; font-weight: 750; line-height: 1.6; overflow-wrap: anywhere; }
-            .papdi-dashboard #recentList .list-info small { display: block; margin-top: 4px; color: #8a8d83; font-size: 11px; line-height: 1.6; }
-            .papdi-dashboard .empty { padding: 28px 8px; color: #7c8178; line-height: 1.7; }
-            .papdi-dashboard .empty b { display: block; margin-bottom: 5px; color: #263e31; }
-            .papdi-dashboard .compat-hidden { display: none !important; }
+            .papdi-dashboard .papdi-feed-head h2 {
+              margin: 0;
+              color: #19372c;
+              font-family: Georgia, "Times New Roman", serif;
+              font-size: clamp(22px, 3vw, 28px);
+              font-weight: 500;
+            }
+            .papdi-dashboard .papdi-feed-head p {
+              margin: 7px 0 0;
+              color: #81877d;
+              font-size: 13px;
+            }
+            .papdi-dashboard .papdi-live {
+              flex-shrink: 0;
+              display: inline-flex;
+              align-items: center;
+              gap: 7px;
+              padding: 7px 10px;
+              border-radius: 999px;
+              background: #eef5ec;
+              color: #356448;
+              font-size: 10px;
+              font-weight: 800;
+              letter-spacing: 0.8px;
+            }
+            .papdi-dashboard .papdi-live::before {
+              content: "";
+              width: 7px;
+              height: 7px;
+              border-radius: 50%;
+              background: #5a9a63;
+            }
+            .papdi-dashboard #recentList {
+              display: flex;
+              flex-direction: column;
+              padding: 4px 24px;
+            }
+            .papdi-dashboard #recentList .list-row {
+              display: flex;
+              align-items: center;
+              gap: 13px;
+              padding: 17px 0;
+              border-bottom: 1px solid #f0f0e9;
+            }
+            .papdi-dashboard #recentList .list-row:last-child {
+              border-bottom: 0;
+            }
+            .papdi-dashboard #recentList .mini-photo {
+              flex: 0 0 44px;
+              width: 44px;
+              height: 44px;
+              border-radius: 13px;
+              background-color: #f5ead3;
+              background-size: cover;
+              background-position: center;
+            }
+            .papdi-dashboard #recentList .list-info {
+              flex: 1;
+              min-width: 0;
+            }
+            .papdi-dashboard #recentList .list-info b {
+              display: block;
+              color: #263e31;
+              font-size: 13px;
+              font-weight: 750;
+              line-height: 1.6;
+              overflow-wrap: anywhere;
+            }
+            .papdi-dashboard #recentList .list-info small {
+              display: block;
+              margin-top: 4px;
+              color: #8a8d83;
+              font-size: 11px;
+              line-height: 1.6;
+            }
+            .papdi-dashboard .empty {
+              padding: 28px 8px;
+              color: #7c8178;
+              line-height: 1.7;
+            }
+            .papdi-dashboard .empty b {
+              display: block;
+              margin-bottom: 5px;
+              color: #263e31;
+            }
+            .papdi-dashboard .compat-hidden {
+              display: none !important;
+            }
             @media (max-width: 600px) {
-              .papdi-dashboard .papdi-hero { padding: 30px 24px; border-radius: 22px; }
-              .papdi-dashboard .papdi-feed { margin-top: 22px; border-radius: 18px; }
-              .papdi-dashboard .papdi-feed-head { padding: 21px 17px 17px; }
-              .papdi-dashboard #recentList { padding-inline: 16px; }
-              .papdi-dashboard #recentList .mini-photo { flex-basis: 38px; width: 38px; height: 38px; }
-              .papdi-dashboard #recentList .list-row { gap: 10px; }
+              .papdi-dashboard .papdi-hero {
+                padding: 30px 24px;
+                border-radius: 22px;
+              }
+              .papdi-dashboard .papdi-feed {
+                margin-top: 22px;
+                border-radius: 18px;
+              }
+              .papdi-dashboard .papdi-feed-head {
+                padding: 21px 17px 17px;
+              }
+              .papdi-dashboard #recentList {
+                padding-inline: 16px;
+              }
+              .papdi-dashboard #recentList .mini-photo {
+                flex-basis: 38px;
+                width: 38px;
+                height: 38px;
+              }
+              .papdi-dashboard #recentList .list-row {
+                gap: 10px;
+              }
             }
           </style>
 
           <div class="papdi-hero">
             <div class="papdi-eyebrow">A little Diwali tradition</div>
             <h1>Pass it on</h1>
-            <p>Soan Papdi is better when it travels. Pass a box to friends or family and keep the Diwali sweetness moving.</p>
-            <button class="papdi-pass-btn" id="heroPass" type="button">Pass it on <span aria-hidden="true">↗</span></button>
+            <p>
+              Soan Papdi is better when it travels. Pass a box to friends or
+              family and keep the Diwali sweetness moving.
+            </p>
+            <button class="papdi-pass-btn" id="heroPass" type="button">
+              Pass it on <span aria-hidden="true">↗</span>
+            </button>
           </div>
 
           <div class="papdi-feed">
@@ -1082,6 +1265,63 @@
           <div id="journeyDetails" class="panel">
             <div class="empty">Enter a box ID to see its journey.</div>
           </div>
+        </section>
+
+        <section class="section hidden" id="mapView">
+          <div class="section-head">
+            <div>
+              <h2>🌍 The Gift Map</h2>
+              <p>
+                Every gift creates a new connection. Explore the sweetness
+                spreading across the map.
+              </p>
+            </div>
+
+            <button class="btn btn-green" id="refreshGiftMap">
+              ↻ Refresh map
+            </button>
+          </div>
+
+          <div class="panel" style="margin-bottom: 15px">
+            <div
+              style="
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                flex-wrap: wrap;
+              "
+            >
+              <span style="font-size: 22px">🪔</span>
+              <div>
+                <strong style="font-size: 13px"
+                  >5 km circles of happiness</strong
+                >
+                <p style="font-size: 11px; color: #87766a; margin: 4px 0 0">
+                  Each circle represents the approximate area around a recipient
+                  who shared their location when accepting a gift.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="giftMap"
+            style="
+              height: min(68vh, 650px);
+              min-height: 420px;
+              width: 100%;
+              border-radius: 17px;
+              border: 1px solid #ecdfcd;
+              z-index: 1;
+            "
+          ></div>
+
+          <p
+            id="giftMapStatus"
+            style="font-size: 12px; color: #87766a; margin-top: 12px"
+          >
+            Open the map to explore accepted gifts.
+          </p>
         </section>
       </main>
     </div>

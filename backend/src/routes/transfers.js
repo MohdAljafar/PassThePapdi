@@ -12,7 +12,17 @@ const passSchema = z.object({
     .regex(/^SP-\d{5}$/i),
   message: z.string().trim().max(300).optional(),
 });
-const claimSchema = z.object({ token: z.string().min(30).max(200) });
+const claimSchema = z.object({
+  token: z.string().min(30).max(200),
+
+  // Location is optional. A user can claim without sharing GPS.
+  location: z
+    .object({
+      latitude: z.number().min(-90).max(90),
+      longitude: z.number().min(-180).max(180),
+    })
+    .optional(),
+});
 const ttlHours = Math.min(
   720,
   Math.max(
@@ -26,12 +36,10 @@ router.post("/", requireAuth, async (req, res, next) => {
   try {
     const parsed = passSchema.safeParse(req.body);
     if (!parsed.success)
-      return res
-        .status(400)
-        .json({
-          error: "Provide a valid box code.",
-          details: parsed.error.flatten(),
-        });
+      return res.status(400).json({
+        error: "Provide a valid box code.",
+        details: parsed.error.flatten(),
+      });
     const box = await prisma.box.findUnique({
       where: { boxCode: parsed.data.boxCode.toUpperCase() },
     });
@@ -58,18 +66,16 @@ router.post("/", requireAuth, async (req, res, next) => {
     const claimUrl = `${(process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, "")}/claim/${rawToken}`;
     const whatsappText = `Oye, your *Soan Papdi* is here! \n ${claimUrl} \n\n Pass it on to friends & family to maintain the *Diwali tradition!*`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
-    res
-      .status(201)
-      .json({
-        transfer: {
-          id: transfer.id,
-          status: transfer.status,
-          expiresAt: transfer.expiresAt,
-          box: transfer.box,
-        },
-        claimUrl,
-        whatsappUrl,
-      });
+    res.status(201).json({
+      transfer: {
+        id: transfer.id,
+        status: transfer.status,
+        expiresAt: transfer.expiresAt,
+        box: transfer.box,
+      },
+      claimUrl,
+      whatsappUrl,
+    });
   } catch (err) {
     next(err);
   }
@@ -91,12 +97,9 @@ router.get("/claim/:token", async (req, res, next) => {
     if (!transfer)
       return res.status(404).json({ error: "This claim link is invalid." });
     if (transfer.status !== "PENDING")
-      return res
-        .status(409)
-        .json({
-          error:
-            "This claim link has already been used or is no longer active.",
-        });
+      return res.status(409).json({
+        error: "This claim link has already been used or is no longer active.",
+      });
     if (transfer.expiresAt <= new Date())
       return res.status(410).json({ error: "This claim link has expired." });
     if (transfer.box.currentOwnerId !== transfer.senderId)
@@ -183,6 +186,19 @@ router.post("/claim", requireAuth, async (req, res, next) => {
             note: transfer.message || "Box passed on through Soan Papdi Club",
           },
         });
+        // Save recipient's location only if they explicitly shared it.
+        if (parsed.data.location) {
+          await tx.giftLocation.create({
+            data: {
+              boxId: transfer.boxId,
+              userId: req.userId,
+              transferId: transfer.id,
+
+              latitude: parsed.data.location.latitude,
+              longitude: parsed.data.location.longitude,
+            },
+          });
+        }
         const box = await tx.box.findUnique({
           where: { id: transfer.boxId },
           select: { boxCode: true, imageUrl: true },
@@ -197,12 +213,10 @@ router.post("/claim", requireAuth, async (req, res, next) => {
     res.status(result.status).json(result.body);
   } catch (err) {
     if (err.message === "BOX_OWNER_CHANGED" || err.code === "P2034")
-      return res
-        .status(409)
-        .json({
-          error:
-            "This box has already been claimed by someone else. No changes were made.",
-        });
+      return res.status(409).json({
+        error:
+          "This box has already been claimed by someone else. No changes were made.",
+      });
     next(err);
   }
 });
