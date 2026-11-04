@@ -14,7 +14,7 @@
   },
   "engines": { "node": ">=20.0.0" },
   "dependencies": {
-    "@prisma/client": "^6.16.2",
+    "@prisma/client": "^6.16.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
@@ -27,6 +27,6 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.10",
-    "prisma": "^6.16.2"
+    "prisma": "^6.16.3"
   }
 }
