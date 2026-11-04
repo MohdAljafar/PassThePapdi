@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowRight, CheckCircle2, Gift, Heart, LoaderCircle, MapPin, ShieldCheck, SkipForward } from "lucide-react";
+import { ArrowRight, CheckCircle2, Gift, Heart, LoaderCircle, MapPin, MapPinned, ShieldCheck, SkipForward } from "lucide-react";
 import GoogleSignIn from "../components/GoogleSignIn";
+import GiftMap from "../components/GiftMap";
 import { api, DEFAULT_IMAGE, getApproximatePosition } from "../lib/api";
 
 export default function ClaimPage({ user, onLogin, onClaimed }) {
@@ -14,6 +15,8 @@ export default function ClaimPage({ user, onLogin, onClaimed }) {
   const [loginError, setLoginError] = useState("");
   const [showLocationChoice, setShowLocationChoice] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
+  const [mapLocations, setMapLocations] = useState([]);
+  const [mapLoading, setMapLoading] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -24,6 +27,17 @@ export default function ClaimPage({ user, onLogin, onClaimed }) {
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [token]);
+
+  useEffect(() => {
+    if (!user) { setMapLocations([]); return undefined; }
+    let active = true;
+    setMapLoading(true);
+    api("/api/map/locations")
+      .then((data) => { if (active) setMapLocations(data.locations || []); })
+      .catch(() => { if (active) setMapLocations([]); })
+      .finally(() => { if (active) setMapLoading(false); });
+    return () => { active = false; };
+  }, [user]);
 
   const credential = useCallback(async (value) => {
     try { setLoginError(""); await onLogin(value); }
@@ -47,7 +61,6 @@ export default function ClaimPage({ user, onLogin, onClaimed }) {
   async function shareAndClaim() {
     setBusy(true); setError("");
     const location = await getApproximatePosition();
-    setBusy(false);
     await finishClaim(location);
   }
 
@@ -83,7 +96,7 @@ export default function ClaimPage({ user, onLogin, onClaimed }) {
                 <p className="text-center text-xs text-muted">You choose whether to share your location in the next step.</p>
               </> : <>
                 <div className="rounded-2xl border border-line bg-cream p-4">
-                  <div className="flex items-start gap-3"><span className="rounded-xl bg-white p-2 text-forest"><MapPin size={20}/></span><div><p className="font-bold text-forest">Add your spot to the gift map?</p><p className="mt-1 text-xs leading-relaxed text-muted">Share an approximate location to add a 5 km circle to the map. Your precise coordinates are not shown publicly.</p></div></div>
+                  <div className="flex items-start gap-3"><span className="rounded-xl bg-white p-2 text-forest"><MapPin size={20}/></span><div><p className="font-bold text-forest">Add your spot to the gift map?</p><p className="mt-1 text-xs leading-relaxed text-muted">Share an approximate location to add a 5 km circle to the map. Your precise coordinates are not shown publicly. Location is optional.</p></div></div>
                 </div>
                 <button disabled={busy} onClick={shareAndClaim} className="flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-4 py-3.5 font-bold text-white disabled:opacity-60">{busy ? <LoaderCircle className="animate-spin"/> : <MapPin size={18}/>} Share location & claim</button>
                 <button disabled={busy} onClick={()=>finishClaim(null)} className="flex w-full items-center justify-center gap-2 rounded-xl border border-line bg-white px-4 py-3.5 font-bold text-forest hover:bg-cream disabled:opacity-60"><SkipForward size={17}/> Skip location & claim</button>
@@ -94,12 +107,33 @@ export default function ClaimPage({ user, onLogin, onClaimed }) {
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-line bg-cream/70 px-5 py-4 text-xs text-muted"><span className="flex items-center gap-1.5"><ShieldCheck size={14} className="text-forest"/> Location is optional</span><span className="flex items-center gap-1.5"><Heart size={14} className="text-gold"/> Pass the happiness forward</span><span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-forest"/> Previewing never claims a gift</span></div>
+
+        <section className="border-t border-line px-5 py-6 sm:px-8">
+          <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+            <div><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-gold">The bigger picture</p><h2 className="mt-1 font-display text-2xl font-bold text-forest">See where the happiness has travelled.</h2></div>
+            <span className="text-xs font-semibold text-muted">A growing map of shared moments</span>
+          </div>
+          {user ? mapLoading ? <div className="grid h-56 place-items-center rounded-2xl bg-cream text-muted"><LoaderCircle className="animate-spin"/></div> : <GiftMap locations={mapLocations} className="h-56 sm:h-64"/> : <div className="flex min-h-56 items-center justify-center rounded-2xl border border-dashed border-line bg-cream px-6 py-8 text-center"><div className="max-w-sm"><div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-white text-forest"><MapPinned size={24}/></div><p className="mt-3 font-bold text-forest">The live map is waiting for you.</p><p className="mt-1 text-sm leading-relaxed text-muted">Sign in to see the locations shared by other members. After you claim your gift, this map will be the first thing you see.</p></div></div>}
+          <p className="mt-3 text-xs leading-relaxed text-muted">Each marker represents an approximate location shared voluntarily. Its circle covers around 5 km; exact coordinates are not displayed.</p>
+        </section>
+
+        <section className="border-t border-line bg-cream/60 px-5 py-6 sm:px-8">
+          <h2 className="text-center font-display text-xl font-bold text-forest">Here's what happens next</h2>
+          <div className="mt-5 grid gap-4 sm:grid-cols-3">
+            <Step icon={<CheckCircle2 size={19}/>} number="01" title="Claim your gift" detail="Accept it and it becomes yours. No location sharing required."/>
+            <Step icon={<MapPin size={19}/>} number="02" title="See the map" detail="Your dashboard opens to the growing journey map."/>
+            <Step icon={<Gift size={19}/>} number="03" title="Pass it forward" detail="Choose someone and send them the next claim link."/>
+          </div>
+        </section>
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-line bg-cream px-5 py-4 text-xs text-muted"><span className="flex items-center gap-1.5"><ShieldCheck size={14} className="text-forest"/> Location is optional</span><span className="flex items-center gap-1.5"><Heart size={14} className="text-gold"/> Pass the happiness forward</span><span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-forest"/> Previewing never claims a gift</span></div>
       </div>
     </ClaimFrame>
   );
 }
 
+function Step({icon,number,title,detail}) {
+  return <div className="flex gap-3 sm:flex-col sm:items-center sm:text-center"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-forest shadow-sm">{icon}</span><div><p className="text-[10px] font-extrabold tracking-[.16em] text-gold">{number}</p><p className="mt-0.5 text-sm font-bold text-forest">{title}</p><p className="mt-1 text-xs leading-relaxed text-muted">{detail}</p></div></div>;
+}
 function ClaimFrame({children}) {
   return <main className="min-h-screen bg-[radial-gradient(circle_at_top,#f3e7d2,transparent_45%),#fff9f0] px-4 py-8 sm:py-14"><div className="mx-auto max-w-4xl">{children}<p className="mt-6 text-center text-xs text-muted">A small gift can travel a long way. 🪔</p></div></main>;
 }
