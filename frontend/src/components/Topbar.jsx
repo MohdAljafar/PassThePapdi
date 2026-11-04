@@ -13,7 +13,7 @@ export default function Topbar({ user, onLogout, onMenu }) {
           </span>
         </Link>
         <div className="flex items-center gap-2">
-          <button onClick={onMenu} className="rounded-full p-2 text-forest hover:bg-white md:hidden" aria-label="Open menu"><Menu size={20}/></button>
+          <button onClick={onMenu} className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-2 text-sm font-bold text-forest transition hover:border-gold/50" aria-label="Open Explore menu"><Menu size={18}/><span className="hidden sm:inline">Explore</span></button>
           <span className="hidden items-center gap-2 rounded-full border border-line bg-white/70 px-3 py-1.5 text-sm text-forest sm:flex">
             <Sparkles size={15} className="text-gold"/> {user?.name?.split(" ")[0] || "Club member"}
           </span>
